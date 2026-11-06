@@ -19,6 +19,11 @@ clients. To connect somora, see [`docs/somora.md`](docs/somora.md).
 - Authenticated access (Bearer token) for HTTP and WebSocket, including the browser.
 - A management UI at `/ui/`: Sets (what an agent speaks with), Voices, Models, a Test page and Settings.
 
+<p>
+  <a href="docs/images/set-page.png"><img src="docs/images/set-page.png" width="49%" alt="A set: listens with, thinks with, speaks as a cloned voice, speaking model and language, with Try it" /></a>
+  <a href="docs/images/sets-list.png"><img src="docs/images/sets-list.png" width="49%" alt="The sets list: each set with its listening, thinking and speaking model and its voice" /></a>
+</p>
+
 Reference docs:
 
 - [`docs/install.md`](docs/install.md) — installing and running: Docker, or
