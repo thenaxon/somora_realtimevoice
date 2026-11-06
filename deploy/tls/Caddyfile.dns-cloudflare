@@ -1,0 +1,21 @@
+# TLS terminator — mode `dns-cloudflare` (automatic Let's Encrypt DNS-01).
+#
+# Requires the xcaddy-built image with github.com/caddy-dns/cloudflare. The
+# Cloudflare API token is read from the environment (CF_API_TOKEN), supplied
+# only through ${RTV_TLS_DIR}/cloudflare.env (0600, never in the repo).
+# No internal CA: certificates are publicly trusted via ACME DNS-01 only.
+{
+	email {$RTV_ACME_EMAIL}
+}
+
+{$RTV_TLS_HOSTNAME}:8444 {
+	tls {
+		issuer acme {
+			dns cloudflare {env.CF_API_TOKEN}
+			disable_http_challenge
+			disable_tlsalpn_challenge
+		}
+	}
+	encode zstd gzip
+	reverse_proxy app:8000
+}

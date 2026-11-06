@@ -1,0 +1,19 @@
+# TLS terminator — mode `files` (operator-provided certificate).
+#
+# Use when the certificate is obtained/renewed elsewhere via a DNS-01
+# challenge. The operator copies fullchain.pem and privkey.pem (0600) into
+# ${RTV_TLS_DIR}/certs, then reloads without downtime:
+#   docker exec somora-realtimevoice-tls caddy reload --config /etc/caddy/Caddyfile
+#
+# Publicly trusted only: no internal CA, nothing to trust manually.
+{
+	# the app is reached through this terminator, never directly
+	auto_https disable_redirects
+	email {$RTV_ACME_EMAIL}
+}
+
+{$RTV_TLS_HOSTNAME}:8444 {
+	tls /certs/fullchain.pem /certs/privkey.pem
+	encode zstd gzip
+	reverse_proxy app:8000
+}

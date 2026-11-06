@@ -1,0 +1,78 @@
+# realtimevoice single-host deployment (host-neutral, no secrets in this file).
+#
+# Copy deploy/deploy.env.example to deploy/deploy.env, fill the required values
+# and run from this directory:
+#   docker compose --env-file deploy.env up -d
+#
+# All host-specific values (bind address, data path, image tag) are required
+# environment variables, never defaults with a real host baked in.
+
+name: somora-realtimevoice
+
+services:
+  app:
+    image: somora-realtimevoice:${RTV_IMAGE_TAG:?}
+    container_name: somora-realtimevoice
+    restart: unless-stopped
+    ports:
+      # explicit bind address: publishing without a host address would listen
+      # on every interface. RTV_BIND_ADDR must be set (e.g. 192.0.2.10).
+      - "${RTV_BIND_ADDR:?}:${RTV_HTTP_PORT:-8766}:8000"
+    volumes:
+      # bind mount (not a named volume): `docker compose down -v` can never
+      # delete the runtime data. The host path is registered here explicitly.
+      - "${RTV_DATA_DIR:?}:/app/data"
+    environment:
+      REALTIMEVOICE_DATA_DIR: /app/data
+      # The instance token is passed through from the environment at run time;
+      # never committed. Leave unset to generate one in server.json on first start.
+      REALTIMEVOICE_AUTH_TOKEN: ${REALTIMEVOICE_AUTH_TOKEN:-}
+      REALTIMEVOICE_REVISION: ${RTV_IMAGE_TAG:-unknown}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional TLS terminator (disabled unless the `tls` profile is enabled):
+  #   docker compose --profile tls --env-file deploy.env up -d
+  # Publicly trusted HTTPS (Let's Encrypt via DNS-01 only, no internal CA) for
+  # a configurable LAN hostname. RTV_TLS_MODE selects the Caddyfile:
+  #   files          - operator-provided fullchain.pem/privkey.pem
+  #   dns-cloudflare - automatic renewal via the Cloudflare DNS plugin
+  # RTV_TLS_IMAGE selects the matching image (stock caddy for `files`, the
+  # xcaddy-built somora-realtimevoice-tls image for `dns-cloudflare`).
+  tls:
+    image: ${RTV_TLS_IMAGE:?}
+    container_name: somora-realtimevoice-tls
+    restart: unless-stopped
+    profiles: ["tls"]
+    depends_on:
+      - app
+    ports:
+      - "${RTV_BIND_ADDR}:${RTV_HTTPS_PORT:-8444}:8444"
+    environment:
+      RTV_TLS_HOSTNAME: ${RTV_TLS_HOSTNAME:?}
+      RTV_ACME_EMAIL: ${RTV_ACME_EMAIL:-}
+    volumes:
+      # read-only PEM pair for `files` mode (0600 on the host)
+      - "${RTV_TLS_DIR:?}/certs:/certs:ro"
+      # ACME account/certificate storage (bind mount, never a named volume)
+      - "${RTV_TLS_DIR:?}/caddy-data:/data"
+      - "./tls/Caddyfile.${RTV_TLS_MODE:?}:/etc/caddy/Caddyfile:ro"
+    # The Cloudflare API token is supplied ONLY through this file (0600,
+    # outside the repo); in `files` mode it may be absent.
+    env_file:
+      - path: ${RTV_TLS_DIR:?}/cloudflare.env
+        required: false
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

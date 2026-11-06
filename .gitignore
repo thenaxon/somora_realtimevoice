@@ -1,0 +1,43 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+data/
+*.local.json
+.env
+.env.*
+!.env.example
+deploy/compose.override.yaml
+logs/
+
+# Browser-harness scratch (Chromium profiles/cache, run artifacts).
+.scratch-browser/
+.scratch-e2e/
+rtv-f1-e2e-scratch-*/
+rtv-ui-smoke-scratch-*/
+
+# Internal planning, notes, one-off probes and evidence: one folder,
+# never pushed (private/ in somora works the same way).
+private/
+
+# Runtime evidence / artifact dumps
+evidence/
+*-evidence/
+harness/**/artifacts/
+
+# Local voice references, generated audio and model weights
+*.wav
+*.flac
+*.mp3
+*.ogg
+*.m4a
+*.pcm
+*.safetensors
+*.gguf

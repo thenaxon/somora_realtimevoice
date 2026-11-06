@@ -1,0 +1,21 @@
+# Optional host-local compose override (EXAMPLE — copy to
+# deploy/compose.override.yaml, which is gitignored, and edit).
+#
+# Run together with the base file:
+#   docker compose -f deploy/compose.yaml -f deploy/compose.override.yaml \
+#       --env-file deploy/deploy.env up -d
+#
+# Why a dedicated subnet: some hosts keep stale Docker raw `PREROUTING ...
+# DROP` filter rules for IP addresses of containers that no longer exist
+# (observed after a subnet rename). Pinning the project to a dedicated bridge
+# with a stable range avoids handing an old, still-dropped address to a new
+# container.
+#
+# Replace 192.0.2.0/24 with an unused private range on your host.
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.0.2.0/24

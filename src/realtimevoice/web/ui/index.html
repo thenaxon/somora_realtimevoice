@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>somora_realtimevoice</title>
+<!-- inline SVG favicon: removes the /favicon.ico 404 without a binary file -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f15'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%235cf2d6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+
+<!-- Sign-in (token in sessionStorage). The tab is reachable by keyboard and
+     every input has a label. -->
+<div id="login-view" class="login-view">
+  <div class="login-card card">
+    <div class="brandmark">
+      <div class="dot9" aria-hidden="true"></div>
+      <div>
+        <div class="bname">somora_realtimevoice</div>
+        <div class="bsub mono">voice for somora</div>
+      </div>
+    </div>
+    <h1 class="h1" style="font-size:18px">Sign in</h1>
+    <div class="fld" style="margin-top:14px">
+      <label for="token">Access token</label>
+      <input id="token" class="inp" type="password" autocomplete="off">
+    </div>
+    <div class="head-actions" style="margin-top:14px">
+      <button id="btn-login" class="btn pri" type="button">Sign in</button>
+      <span id="login-status" class="statusline" role="status"></span>
+    </div>
+    <div class="fhint" style="margin-top:16px">
+      The token is kept in this browser tab only.
+    </div>
+  </div>
+</div>
+
+<!-- Shared shell mounts here after sign-in. Account actions (Sign out)
+     are rendered INSIDE the shell footer, never as a position:fixed element
+     over the content. -->
+<div id="shell-mount" class="hidden"></div>
+
+<style>
+  /* view-local only; tokens and shell live in the shared files */
+  .login-view{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{width:100%;max-width:400px}
+</style>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
